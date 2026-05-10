@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta
+            name="description"
+            content="Мини-игра-викторина: Миф или Правда? Выбирай один из двух вариантов и смотри объяснение."
+    />
+    <meta name="theme-color" content="#0b0d12"/>
+    <title>Миф или Правда — мини‑викторина</title>
+
+    <link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+    <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap"
+            rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+<div class="bg">
+    <div class="bg__glow bg__glow--a"></div>
+    <div class="bg__glow bg__glow--b"></div>
+    <div class="noise" aria-hidden="true"></div>
+</div>
+
+<header class="topbar">
+    <div class="brand">
+        <div class="brand__logo" aria-hidden="true">◎</div>
+        <div class="brand__text">
+            <div class="brand__title">Миф или Правда</div>
+            <div class="brand__subtitle">мини‑викторина</div>
+        </div>
+    </div>
+
+    <div class="topbar__right">
+        <button class="icon-btn" id="btnResetTop" type="button" title="Сбросить">
+            ↺
+        </button>
+    </div>
+</header>
+
+<main class="container">
+    <section class="card app" id="app" aria-live="polite">
+        <div class="screen screen--active" id="screenStart">
+            <div class="hero">
+                <div class="pill">Одиночная игра • live-игра по ссылке • таблица результатов</div>
+                <h1 class="hero__title">Игра: <span class="grad">Миф</span> или <span class="grad2">Правда</span>?</h1>
+                <p class="hero__desc">
+                    Играй один в готовых категориях или создай live-игру из разных тем, чтобы участники присоединились по ссылке или QR-коду.
+                </p>
+
+                <div class="hero__meta">
+                    <div class="meta">
+                        <div class="meta__k">Вопросов</div>
+                        <div class="meta__v" id="metaTotal">20</div>
+                    </div>
+                    <div class="meta">
+                        <div class="meta__k">Категорий</div>
+                        <div class="meta__v" id="metaCategories">3</div>
+                    </div>
+                    <div class="meta">
+                        <div class="meta__k">Режим</div>
+                        <div class="meta__v" id="metaMode">соло / live</div>
+                    </div>
+                </div>
+                <div class="hero__actions">
+                    <button class="btn btn--primary" id="btnStart" type="button">
+                        Все темы
+                    </button>
+                    <button class="btn btn--ghost" id="btnShuffle" type="button" title="Перемешать вопросы">
+                        Случайный микс
+                    </button>
+                    <button class="btn btn--ghost" id="btnOpenCreate" type="button">
+                        Создать игру
+                    </button>
+                </div>
+
+                <div class="notice" id="importNotice" hidden></div>
+
+                <div class="default-games">
+                    <div class="section-heading">
+                        <div>
+                            <h2>Готовые одиночные игры</h2>
+                            <p>Выбери категорию и играй сразу.</p>
+                        </div>
+                    </div>
+                    <div class="category-grid" id="categoryList"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="screen" id="screenCreate">
+            <div class="builder">
+                <div class="screen-head">
+                    <div>
+                        <div class="pill">Организатор</div>
+                        <h2 class="screen-head__title">Создать игру</h2>
+                        <p class="screen-head__text">Выбери темы, количество вопросов и отправь участникам live-ссылку или QR-код.</p>
+                    </div>
+                    <button class="btn btn--ghost" id="btnBackFromCreate" type="button">На старт</button>
+                </div>
+
+                <div class="form-grid">
+                    <label class="form-field">
+                        <span class="form-label">Название игры</span>
+                        <input class="input" id="gameTitle" type="text" maxlength="60" value="Исторический батл"/>
+                    </label>
+                    <label class="form-field">
+                        <span class="form-label">Имя организатора</span>
+                        <input class="input" id="hostName" type="text" maxlength="32" placeholder="Например, Alex"/>
+                    </label>
+                    <label class="form-field">
+                        <span class="form-label">Количество вопросов</span>
+                        <input class="input" id="questionLimit" type="number" min="1" value="10"/>
+                    </label>
+                </div>
+
+                <div class="form-field">
+                    <div class="form-label">Темы</div>
+                    <div class="topic-list" id="createCategories"></div>
+                </div>
+
+                <div class="builder__actions">
+                    <button class="btn btn--primary" id="btnCreateGame" type="button">Создать live-игру</button>
+                    <button class="btn btn--ghost" id="btnStartHost" type="button" disabled>Играть как участник</button>
+                </div>
+
+                <div class="notice notice--error" id="createStatus" hidden></div>
+
+                <div class="share-panel" id="sharePanel" hidden>
+                    <div class="share-panel__main">
+                        <label class="form-field">
+                            <span class="form-label">Ссылка для участников</span>
+                            <input class="input input--readonly" id="shareLink" type="text" readonly/>
+                        </label>
+                        <div class="share-panel__actions">
+                            <button class="btn btn--primary" id="btnCopyLink" type="button">Скопировать ссылку</button>
+                        </div>
+                        <p class="share-panel__hint" id="shareHint"></p>
+                    </div>
+                    <div class="qr-box">
+                        <img id="qrImage" alt="QR-код для входа в игру"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="screen" id="screenJoin">
+            <div class="join">
+                <div class="pill">Игра по ссылке</div>
+                <h2 class="join__title" id="joinTitle">...</h2>
+                <p class="join__summary" id="joinSummary">...</p>
+
+                <label class="form-field">
+                    <span class="form-label">Твоё имя в таблице</span>
+                    <input class="input" id="playerName" type="text" maxlength="32" placeholder="Игрок"/>
+                </label>
+
+                <div class="join__actions">
+                    <button class="btn btn--primary" id="btnJoinGame" type="button">Войти в игру</button>
+                    <button class="btn btn--ghost" id="btnJoinBack" type="button">На старт</button>
+                </div>
+
+                <div class="leaderboard" id="joinLeaderboard" hidden></div>
+            </div>
+        </div>
+
+        <div class="screen" id="screenQuestion">
+            <div class="status">
+                <div class="status__left">
+                    <div class="progress">
+                        <div class="progress__bar" id="progressBar" style="width: 0%"></div>
+                    </div>
+                    <div class="status__text" id="statusText">Вопрос 1 из 20</div>
+                </div>
+                <div class="status__right">
+                    <div class="score-chip" id="scoreChip" title="Текущий счёт">
+                        <span class="score-chip__label">Счёт</span>
+                        <span class="score-chip__value" id="scoreValue">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question__card">
+                    <div class="question__label" id="questionCategory">Вопрос</div>
+                    <h2 class="question__title" id="questionText">...</h2>
+                    <div class="question__sub" id="questionSub">Выбери вариант</div>
+
+                    <div class="answers">
+                        <button class="answer answer--left" id="btnA" type="button">
+                            <span class="answer__tag">A</span>
+                            <span class="answer__text" id="btnAText">...</span>
+                        </button>
+                        <button class="answer answer--right" id="btnB" type="button">
+                            <span class="answer__tag">B</span>
+                            <span class="answer__text" id="btnBText">...</span>
+                        </button>
+                    </div>
+
+                    <div class="tiny">
+                        Нажми <kbd>A</kbd> или <kbd>B</kbd> на клавиатуре.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="screen" id="screenResult">
+            <div class="result" id="resultBox">
+                <div class="result__badge" id="resultBadge">Правильно</div>
+                <h2 class="result__title" id="resultTitle">Отлично!</h2>
+
+                <div class="result__explain">
+                    <div class="result__label">Объяснение</div>
+                    <p class="result__text" id="resultText">...</p>
+
+                    <div class="result__sources" id="resultSources" hidden>
+                        <div class="result__label">Источники</div>
+                        <ul class="result__sourcesList" id="resultSourcesList"></ul>
+                    </div>
+                </div>
+
+                <div class="result__actions">
+                    <button class="btn btn--primary" id="btnNext" type="button">
+                        Дальше
+                    </button>
+                    <button class="btn btn--ghost" id="btnToStart" type="button">
+                        На старт
+                    </button>
+                </div>
+
+                <div class="result__meta" id="resultMeta">Вопрос 1 из 20</div>
+            </div>
+        </div>
+
+        <div class="screen" id="screenFinal">
+            <div class="final">
+                <div class="final__badge">Результат</div>
+                <h2 class="final__title" id="finalTitle">Готово!</h2>
+
+                <div class="final__score">
+                    <div class="final__scoreBig" id="finalScore">0/25</div>
+                    <div class="final__scoreText" id="finalText">...</div>
+                </div>
+
+                <div class="final__actions">
+                    <button class="btn btn--primary" id="btnRestart" type="button">
+                        Сыграть ещё раз
+                    </button>
+                    <button class="btn btn--ghost" id="btnShare" type="button" title="Скопировать результат">
+                        Скопировать результат
+                    </button>
+                    <button class="btn btn--ghost" id="btnFinalHome" type="button">
+                        На главный экран
+                    </button>
+                </div>
+
+                <div class="leaderboard" id="leaderboardBox" hidden></div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<script src="questions.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
